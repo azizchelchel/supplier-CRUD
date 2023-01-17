@@ -1,0 +1,24 @@
+{
+  "name": "javascript-prisma-mysql",
+  "version": "1.0.0",
+  "description": "a restful api using  node mysql and prisma orm",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "author": "chellal aziz",
+  "license": "ISC",
+  "devDependencies": {
+    "express-validator": "^6.14.2",
+    "nodemon": "^2.0.20",
+    "prisma": "^4.8.1"
+  },
+  "dependencies": {
+    "@prisma/client": "^4.8.1",
+    "express": "^4.18.2",
+    "express-joi-validation": "^5.0.1",
+    "joi": "^17.7.0"
+  }
+}
