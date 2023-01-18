@@ -12,17 +12,20 @@ datasource db {
 
 model Supplier {
 
-  id        Int    @id @default(autoincrement())
+  id            Int    @id @default(autoincrement())
 
-  name      String @unique
+  name          String 
 
-  contact   String 
+  contact       String 
 
-  email     String 
+  email         String 
 
-  phone_num String
+  countryCode   String 
 
-  address   String
+  number        String 
+
+  @@unique(fields: [countryCode, number], name: "phoneNumber")
+
+  address       String
 
 }
-//

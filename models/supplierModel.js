@@ -1,18 +1,18 @@
 import Prisma from '@prisma/client'
-
-
-/** Instantiate Prisma client */
 const prisma = new Prisma.PrismaClient();
 
 
 const  insertSupplier= (dataInput)=>{
 
 return new Promise( async (resolve,reject)=>{
-
+    
 await prisma.Supplier.findUnique({
 
     where:{
-        name:dataInput.name
+        phoneNumber:{
+            countryCode:dataInput.countryCode,
+            number:dataInput.number
+        }
     }
 })
 .then(async (found) => { 
@@ -24,8 +24,9 @@ await prisma.Supplier.findUnique({
                     name:dataInput.name,
                     contact:dataInput.contact,
                     email:dataInput.email,
-                    phone_num:dataInput.phone_num,
-                    address: dataInput.address ,  
+                    countryCode:dataInput.countryCode,
+                    number: dataInput.number ,
+                    address:dataInput.address  
                 },
             });
         console.log('supplier added')
@@ -48,14 +49,42 @@ await prisma.Supplier.findUnique({
 
 })}
 
-const  findSupplier= (dataInput)=>{
+
+const  findAllSuppliers= ()=>{
+
+    return new Promise( async (resolve,reject)=>{
+    
+    await prisma.Supplier.findMany()
+    .then(async (found) => { 
+        if (found){
+            await prisma.$disconnect();
+            resolve(found) ;
+        }else{
+            await prisma.$disconnect();
+            reject('no supplier in DB')
+        }
+    }
+    )
+    .catch(
+        async(err) => {
+            console.log('system error'+err);
+            await prisma.$disconnect()
+            reject('system error')
+        }
+    )
+})}  
+
+
+
+const  findSupplier= (id)=>{
+
+    console.log(id)
 
     return new Promise( async (resolve,reject)=>{
     
     await prisma.Supplier.findUnique({
-    
         where:{
-            name:dataInput.name
+            id:id
         }
     })
     .then(async (found) => { 
@@ -81,79 +110,89 @@ const  findSupplier= (dataInput)=>{
 
 
 const  updateInDbSupplier= (dataInput)=>{
+const phoneNumber=`${dataInput.countryCode}${dataInput.number}`;
+console.log(phoneNumber)
 
-    return new Promise( async (resolve,reject)=>{
+return new Promise( async (resolve,reject)=>{
     
-    await prisma.Supplier.findUnique({
+await prisma.Supplier.findUnique({
     
-        where:{
-            name:dataInput.name
-        }
-    })
-    .then(async (found) => { 
-    
-        if (found){
-            await prisma.Supplier.update({
-                where:{
-                    name:found.name
-                },
-                data:{
-                    address:dataInput.address
-                   
-                }
-            });
-            await prisma.$disconnect();
-            resolve( inputData) ;
-        }else{
-            await prisma.$disconnect();
-            reject('wanted supplier to update not found')
+    where:{
+        phoneNumber:{
+            countryCode:dataInput.countryCode,
+            number:dataInput.number
         }
     }
-    )
-    .catch(
-        async(err) => {
-            console.log('system error'+err);
-            await prisma.$disconnect()
-            reject('system error')
-        }
-    )
+})
+.then(async (found) => { 
+    
+    if (found){
+        await prisma.Supplier.update({
+            where:{
+                id:found.id
+            },
+            data:{
+                address:dataInput.address 
+            }
+        }).then(async(updatedSupplier) => { 
+            await prisma.$disconnect();
+            resolve( updatedSupplier) ; 
+        })
+            
+    }else{
+        await prisma.$disconnect();
+        reject('supplier to update not found')
+    }
+}
+)
+.catch(
+    async(err) => {
+        console.log('system error'+err);
+        await prisma.$disconnect()
+        reject('system error')
+    }
+)
 })}  
 
 
-const  deleteFromDbSupplier= (dataInput)=>{
-
-    return new Promise( async (resolve,reject)=>{
+const  deleteFromDbSupplier= (id)=>{
+console.log(id)
+return new Promise( async (resolve,reject)=>{
     
-    await prisma.Supplier.findUnique({
+await prisma.Supplier.findUnique({
     
-        where:{
-            name:dataInput.name
-        }
-    })
-    .then(async (found) => { 
-    
-        console.log(found)
-        if (found){
-            await prisma.Supplier.delete({
-                where:{
-                    name:found.name
-                }
-            })
-            await prisma.$disconnect();
-            resolve(found) ;
-        }else{
-            await prisma.$disconnect();
-            reject('wanted supplier to delete not found')
-        }
+    where:{
+        id:id
     }
-    )
-    .catch(
-        async(err) => {
-            console.log('system error'+err);
-            await prisma.$disconnect()
-            reject('system error')
-        }
-    )
+})
+.then(async (found) => { 
+    
+    if (found){
+        await prisma.Supplier.delete({
+            where:{
+                id:id
+            }
+        }).then(
+            async (supplier) => {  
+            await prisma.$disconnect();
+            resolve(supplier) ; 
+        }).catch(async (error) => { 
+            await prisma.disconnect();
+            reject(error)
+            })
+    }else{
+        await prisma.$disconnect();
+        reject('supplier not found')
+    }
+}
+)
+.catch(
+    async(err) => {
+        console.log('system error'+err);
+        await prisma.$disconnect()
+        reject('system error')
+    }
+)
 })} 
 
 
@@ -161,4 +200,4 @@ const  deleteFromDbSupplier= (dataInput)=>{
 
     
 
-export {insertSupplier, deleteFromDbSupplier, updateInDbSupplier,findSupplier};
+export {insertSupplier, deleteFromDbSupplier, updateInDbSupplier,findSupplier, findAllSuppliers};
